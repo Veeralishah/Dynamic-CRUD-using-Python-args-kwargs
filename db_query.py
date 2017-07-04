@@ -1,8 +1,12 @@
 #_*_ coding:utf-8 _*_
 
 import db_config
+import sqlite3
 import sys
 import warnings
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+# Base File that contain class for CURD operation in Database
 
 
 class DBwrapper:
@@ -28,7 +32,7 @@ class DBwrapper:
             print 'Student Details Table created'
             self.conn.commit()
 
-# INSERT VALUES
+# INSERT TABLE ROW VALUES
 
     def insertTable(self, *args):
         cur = self.conn.cursor()
@@ -43,6 +47,7 @@ class DBwrapper:
         self.conn.commit()
 
 # RETRIEVE TABLE ROWS
+
     def retrieveTable(self, *args):
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM StudentDetail")
@@ -52,7 +57,8 @@ class DBwrapper:
         else:
             print rows
 
-# UPDATE ROW
+# UPDATE TABLE ROW
+
     def updateRow(self, *args):
         cur = self.conn.cursor()
         u_id = args[0]
@@ -69,7 +75,7 @@ class DBwrapper:
             print 'Record Not Updated'
 
 
-# DELETE ROW
+# DELETE TABLE ROW
 
     def deleteRow(self, *args):
         cur = self.conn.cursor()
@@ -83,12 +89,45 @@ class DBwrapper:
         except Exception as e:
             print "Record with the given id not found"
 
+# CREATE DATABASE
+
+    def addDb_mysql(self):
+        self.conn = db_config.createdb_mysql()
+        cur = self.conn.cursor()
+        name = raw_input("Enter Name For Databse")
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            cur.execute("SET sql_notes = 0; ")
+            cur.execute("CREATE DATABASE IF NOT EXISTS " + name + ";")
+            print "Database Created Successfully"
+            self.conn.commit()
+
+    def addDb_postgresql(self):
+        cur = self.conn.cursor()
+        name = raw_input("Enter Name For Databse")
+        self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur.execute('CREATE DATABASE ' + name)
+        print "Database Created Successfully"
+        self.conn.commit()
+
+    def addDb_sqlite(self):
+        self.conn = db_config.createdb_sqlite()
+        name_db = raw_input("Enter Name For Databse")
+        try:
+            sqlite3.connect(name_db + '.db')
+            print "Database Created Successfully"
+            self.conn.commit()
+        except Exception as e:
+            print e
+
+
 # ADD COlUMN IN THE TABLE
 
     def addColumn(self, *args):
         colname = args[0]
         cur = self.conn.cursor()
-        cur.execute("ALTER TABLE StudentDetail ADD colname VARCHAR(15) ;")
+        cur.execute("ALTER TABLE StudentDetail ADD COLUMN " +
+                    args[0] + " VARCHAR(15) ;")
         self.conn.commit()
         print "Column is added"
 
@@ -97,16 +136,24 @@ class DBwrapper:
     def deleteCol(self, *args):
         col_name = args[0]
         cur = self.conn.cursor()
-        cur.execute("describe StudentDetail;")
-        cur.execute("ALTER TABLE StudentDetail DROP COLUMN col_name;")
+        cur.execute("ALTER TABLE StudentDetail DROP COLUMN " + args[0])
         self.conn.commit()
         print "Column is deleted"
+
+# DELETE TABLE FROM DATABASE
+
+    def deleteTable(self, *args):
+        cur = self.conn.cursor()
+        tbname = args[0]
+        cur.execute("DROP TABLE " + args[0])
+        self.conn.commit()
+        print "table is deleted"
 
 # SHOW TABLES
 
     def listTable_mysql(self):
         self.conn = db_config.createdb_mysql()
-        cur = self.db.cursor()
+        cur = self.conn.cursor()
         cur.execute('SHOW TABLES')
         rows = cur.fetchall()
         for row in rows:
@@ -117,7 +164,7 @@ class DBwrapper:
         cur = self.conn.cursor()
         cur.execute(
             "SELECT * FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' ORDER BY table_type, table_name")
-        rows = self.cur.fetchall()
+        rows = cur.fetchall()
         for row in rows:
             print row[2]
 
@@ -126,28 +173,35 @@ class DBwrapper:
         cur = self.conn.cursor()
         cur.execute(
             "SELECT name FROM sqlite_master WHERE type='table'")
-        rows = self.cur.fetchall()
+        rows = cur.fetchall()
         for row in rows:
-            row
+            print row
 
 
 # SHOW DATABASE
-def listDb(self):
 
-    if self.db == '1':
-        self.cur.execute('SHOW DATABASES')
-        rows = self.cur.fetchall()
+    def listDb_mysql(self):
+        self.conn = db_config.createdb_mysql()
+        cur = self.conn.cursor()
+        cur.execute('SHOW DATABASES')
+        rows = cur.fetchall()
         for row in rows:
             print row
-    elif self.db == '2':
-        self.cur.execute('PRAGMA database_list;')
-        rows = self.cur.fetchall()
-        print rows
-        for row in rows:
-            print row[2]
-    else:
-        self.cur.execute(
+
+    def listDb_Postgresql(self):
+        self.conn = db_config.creatdb_postgres()
+        cur = self.conn.cursor()
+        cur.execute(
             'SELECT datname FROM pg_database WHERE datistemplate = false;')
-        rows = self.cur.fetchall()
+        rows = cur.fetchall()
         for row in rows:
             print row
+
+    def listDb_sqlite(self):
+        self.conn = db_config.creatdb_sqlite()
+        cur = self.conn.cursor()
+        cur.execute('PRAGMA database_list;')
+        rows = cur.fetchall()
+        for row in rows:
+            print row
+            print "SQLite can not show All Databases using Python"
