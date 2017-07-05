@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #_*_ coding:utf-8 _*_
 
 import db_config
@@ -19,6 +20,23 @@ class DBwrapper:
             self.conn = db_config.creatdb_postgres()
         elif user == "3":
             self.conn = db_config.creatdb_sqlite()
+
+
+# CREATE TABLE FROM USER
+
+    def createTable(self, tbl_name, *args):
+        self.tblname = tbl_name
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            warnings.filterwarnings('ignore', 'unknown table')
+            cur = self.conn.cursor()
+            query = "CREATE TABLE {}({})".format(self.tblname, *args)
+            try:
+                cur.execute(query)
+                print 'Table created'
+                self.conn.commit()
+            except Exception as e:
+                print e
 
 # CREATE A NEW TABLE
 
