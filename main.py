@@ -1,12 +1,32 @@
+#!/usr/bin/python
 #_*_ coding:utf-8 _*_
 
 import db_query
+import sys
+
 
 # Menu driven of front hand for CURD operation in Databases
 
 
 def addTable():
     obj.createTable()
+
+def cTable():
+    tbl_name = raw_input("Enter Table Name")
+    col_count = int(raw_input("Enter No of Columns"))
+
+    i = 0
+    if i == col_count:
+        sys.exit(1)
+    else:
+        col = ""
+        for i in range(col_count):
+            col_name = raw_input("Enter Col name")
+            col_type = raw_input("Enter Column Type")
+            col = col + str(col_name) + " " + str(col_type) + ", "
+    col = col[:-2]
+    print col
+    obj.createTable(tbl_name,col)
 
 
 def insertTable():
@@ -59,7 +79,8 @@ def listTable():
     elif name_db == "3":
         obj.listTable_sqlite()
     else:
-        pass
+        print("Please Enter Valid Input")
+        sys.exit(1)
 
 
 def listDb():
@@ -74,7 +95,8 @@ def listDb():
     elif name_db == "3":
         obj.listDb_sqlite()
     else:
-        pass
+        print("Please Enter Valid Input")
+        sys.exit(1)
 
 
 def addDB():
@@ -89,59 +111,67 @@ def addDB():
     elif u_db == "3":
         obj.addDb_sqlite()
     else:
-        pass
+        print("Please Enter Valid Input")
+        sys.exit(1)
 
 
 def option():
-    print "1. Create Database"
-    print "2. Show Tables"
-    print "3  Show Database "
-    print "4  Create Table"
-    print "5. Read Data"
-    print "6. Insert Data"
-    print "7. Update Data"
-    print "8. Delete Data"
-    print "9. Add New Column"
-    print "10  Delete Existing Column"
-    print "11  Delete Table "
-    print "12. Quit"
+    print "1  Create Table of Your Choice"
+    print "2. Create Database"
+    print "3. Show Tables"
+    print "4  Show Database "
+    print "5  Create Table"
+    print "6. Read Data"
+    print "7. Insert Data"
+    print "8. Update Data"
+    print "9. Delete Data"
+    print "10. Add New Column"
+    print "11  Delete Existing Column"
+    print "12  Delete Table"
+    print "13. Quit"
 
     user_input = raw_input("Which operations you want to perform?")
     if user_input == "1":
-        addDB()
+        cTable()
         option()
     elif user_input == "2":
-        listTable()
+        addDB()
         option()
     elif user_input == "3":
-        listDb()
+        listTable()
         option()
     elif user_input == "4":
-        addTable()
+        listDb()
         option()
     elif user_input == "5":
-        obj.retrieveTable()
+        addTable()
         option()
     elif user_input == "6":
-        insertTable()
+        obj.retrieveTable()
         option()
     elif user_input == "7":
-        updateRow()
+        insertTable()
         option()
     elif user_input == "8":
-        deleteRow()
+        updateRow()
         option()
     elif user_input == "9":
-        addColumn()
+        deleteRow()
         option()
     elif user_input == "10":
-        deleteCol()
+        addColumn()
         option()
     elif user_input == "11":
+        deleteCol()
+        option()
+    elif user_input == "12":
         deleteTable()
         option()
+    elif user_input == "13":
+        sys.exit(1)
     else:
         print "Please Enter Valid Input"
+        sys.exit(1)
 
 # Main Function .. Execution Start
 def choice():
